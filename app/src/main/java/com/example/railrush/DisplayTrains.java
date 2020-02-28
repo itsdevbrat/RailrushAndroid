@@ -24,7 +24,9 @@ import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -86,7 +88,7 @@ public class DisplayTrains extends AppCompatActivity {
                             try {
                                 Log.w("Count", String.valueOf(response.body().getCrowdCount()));
                                 trainsList.add(new Train(train.getString("start"), train.getString("dest"), train.getString("time"), String.valueOf((int) response.body().getCrowdCount()), " (" + response.body().getLastStation() + ")"));
-                                trainsList.sort(new Comparator<Train>() {
+                                Collections.sort(trainsList,new Comparator<Train>() {
                                     @Override
                                     public int compare(Train o1, Train o2) {
                                         try {
