@@ -2,25 +2,21 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg"
-    tools:context=".MainActivity">
+    android:background="@drawable/bg">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="RailRush"
-        android:textColor="#fff"
-        android:textSize="65sp"
-        android:letterSpacing="0.1"
+        android:background="#85000000"
         android:gravity="center|bottom"
         android:paddingBottom="200dp"
-        android:background="#77000000"
+        android:text="RailRush"
+        android:textColor="#fff"
+        android:textSize="70sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>
