@@ -3,6 +3,7 @@ package com.example.railrush;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,7 +21,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -32,19 +36,32 @@ public class DisplayTrains extends AppCompatActivity {
     private ArrayList<Train> trainsList;
     private TrainsRVAdapter trainsRVAdapter;
     private RecyclerView trainsRV;
+    private SwipeRefreshLayout swipe;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_trains);
         trainsList = new ArrayList<>();
+        trainsRV = findViewById(R.id.trainsRV);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(DisplayTrains.this, RecyclerView.VERTICAL, false);
+        trainsRV.setLayoutManager(linearLayoutManager);
+        swipe = findViewById(R.id.trainsRVRefresh);
+        updateCount();
+        swipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                trainsList.clear();
+                updateCount();
+                trainsRVAdapter.notifyDataSetChanged();
+            }
+        });
+    }
+
+    public void updateCount() {
         String current = getIntent().getStringExtra("station");
         String dest = getIntent().getStringExtra("dest");
-        trainsRV = findViewById(R.id.trainsRV);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(DisplayTrains.this,RecyclerView.VERTICAL,false);
-        trainsRV.setLayoutManager(linearLayoutManager);
-
-        try{
+        try {
             InputStream fileInputStream = getAssets().open("stations.json");
             ArrayList<String> stationsList = new ArrayList<>();
             int size = fileInputStream.available();
@@ -54,42 +71,55 @@ public class DisplayTrains extends AppCompatActivity {
             JSONArray jsonArray = new JSONArray(jsonString);
             for (int i = 0; i < jsonArray.length(); i++) {
                 final JSONObject station = jsonArray.getJSONObject(i);
-                if(station.getString("name").equals(current)){
+                if (station.getString("name").equals(current)) {
                     currentStationTrains = station.getJSONArray("trainsAndTime");
                 }
             }
             CrowdInterface crowdService = RailrushClient.getClient().create(CrowdInterface.class);
             for (int i = 0; i < currentStationTrains.length(); i++) {
                 final JSONObject train = currentStationTrains.getJSONObject(i);
-                if(train.getString("dest").equals(dest)){
+                if (train.getString("dest").equals(dest)) {
                     Call<Count> countCall = crowdService.getCrowdCount(train.getString("trainId"));
                     countCall.enqueue(new Callback<Count>() {
                         @Override
                         public void onResponse(Call<Count> call, Response<Count> response) {
-                            try{
-                                Log.w("Count",String.valueOf(response.body().getCrowdCount()));
-                                trainsList.add(new Train(train.getString("start"),train.getString("dest"),train.getString("time"),String.valueOf(response.body().getCrowdCount())));
+                            try {
+                                Log.w("Count", String.valueOf(response.body().getCrowdCount()));
+                                trainsList.add(new Train(train.getString("start"), train.getString("dest"), train.getString("time"), String.valueOf((int) response.body().getCrowdCount()), " (" + response.body().getLastStation() + ")"));
+                                trainsList.sort(new Comparator<Train>() {
+                                    @Override
+                                    public int compare(Train o1, Train o2) {
+                                        try {
+                                            DateFormat dateFormat = new SimpleDateFormat("hh:mm");
+                                            long d1 = dateFormat.parse(o1.getTime()).getTime();
+                                            long d2 = dateFormat.parse(o2.getTime()).getTime();
+                                            return (int) (d1 - d2);
+                                        } catch (Exception e) {
+                                            Log.e("DATE_____________", e.toString());
+                                        }
+                                        return 0;
+                                    }
+                                });
                                 trainsRVAdapter = new TrainsRVAdapter(trainsList);
                                 trainsRV.setAdapter(trainsRVAdapter);
-                            }catch (Exception e){
-                                Log.w("CountCatch","Error on response"+e.toString());
+                                swipe.setRefreshing(false);
+                            } catch (Exception e) {
+                                Log.w("CountCatch", "Error on response" + e.toString());
                             }
                         }
 
                         @Override
                         public void onFailure(Call<Count> call, Throwable t) {
-                            Log.w("SERVER ERRROR",t.toString());
+                            Log.w("SERVER ERRROR", t.toString());
                         }
                     });
                 }
             }
-
-
-
-        }catch (Exception e){
-            Log.w("Count","Error Disla"+e.toString());
+        } catch (Exception e) {
+            Log.w("Count", "Error Disla" + e.toString());
 
         }
     }
+
 }
 

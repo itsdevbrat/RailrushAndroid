@@ -39,7 +39,7 @@ public class SelectStation extends AppCompatActivity {
                 stationsList.add(station.getString("name"));
                 TextView stationTV = new TextView(this);
                 stationTV.setTextColor(getResources().getColor(R.color.colorWhite));
-                stationTV.setBackground(getDrawable(R.drawable.round_corners));
+                stationTV.setBackground(getDrawable(R.drawable.round_corners_blue));
                 LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
                 layoutParams.setMargins(10,10,10,10);
                 layoutParams.gravity = Gravity.CENTER;
@@ -53,7 +53,6 @@ public class SelectStation extends AppCompatActivity {
                         }catch (Exception e){}
                         Log.w("Station", intent.getStringExtra("station"));
                         startActivity(intent);
-                        finish();
                     }
                 });
                 stationTV.setPadding(50,50,50,50);

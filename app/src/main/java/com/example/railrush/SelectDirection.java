@@ -20,7 +20,6 @@ public class SelectDirection extends AppCompatActivity {
         intent.putExtra("station",getIntent().getStringExtra("station"));
         intent.putExtra("dest","virar");
         startActivity(intent);
-        finish();
     }
 
     public void selectedChurchgate(View view) {
@@ -28,6 +27,5 @@ public class SelectDirection extends AppCompatActivity {
         intent.putExtra("station",getIntent().getStringExtra("station"));
         intent.putExtra("dest","churchgate");
         startActivity(intent);
-        finish();
     }
 }
