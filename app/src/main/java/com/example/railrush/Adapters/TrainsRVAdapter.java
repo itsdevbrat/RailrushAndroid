@@ -11,14 +11,15 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.railrush.Models.Count;
 import com.example.railrush.Models.Train;
 import com.example.railrush.R;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import com.example.railrush.Services.CrowdInterface;
+import com.example.railrush.Services.RailrushClient;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class TrainsRVAdapter extends RecyclerView.Adapter<TrainViewHolder> {
     ArrayList<Train> trainsList;
@@ -35,16 +36,31 @@ public class TrainsRVAdapter extends RecyclerView.Adapter<TrainViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull TrainViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final TrainViewHolder holder, final int position) {
         holder.start.setText(trainsList.get(position).getStart());
         holder.dest.setText(trainsList.get(position).getDest());
         holder.time.setText(trainsList.get(position).getTime());
-        holder.count.setText(trainsList.get(position).getCount());
-        holder.lastStation.setText(trainsList.get(position).getLastStation());
-        if(Integer.parseInt(trainsList.get(position).getCount()) < 80)
-            holder.trainsRVItem.setBackground(context.getDrawable(R.drawable.round_corners_green));
-        else
-            holder.trainsRVItem.setBackground(context.getDrawable(R.drawable.round_corners_red));
+        CrowdInterface crowdService = RailrushClient.getClient().create(CrowdInterface.class);
+        Call<Count> call = crowdService.getCrowdCount(trainsList.get(position).getTrainNo());
+        Log.w("Error to fetc count",trainsList.get(position).getTrainNo());
+
+        call.enqueue(new Callback<Count>() {
+            @Override
+            public void onResponse(Call<Count> call, Response<Count> response) {
+                holder.lastStation.setText("("+String.valueOf(response.body().getLastStation())+")");
+                holder.count.setText(String.valueOf((int)response.body().getCrowdCount()));
+                if(response.body().getCrowdCount() < 80)
+                    holder.trainsRVItem.setBackground(context.getDrawable(R.drawable.round_corners_green));
+                else
+                    holder.trainsRVItem.setBackground(context.getDrawable(R.drawable.round_corners_red));
+            }
+
+            @Override
+            public void onFailure(Call<Count> call, Throwable t) {
+                Log.e("Error to fetc count", t.toString());
+            }
+        });
+
     }
 
     @Override

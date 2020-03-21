@@ -63,6 +63,8 @@ public class DisplayTrains extends AppCompatActivity {
     public void updateCount() {
         String current = getIntent().getStringExtra("station");
         String dest = getIntent().getStringExtra("dest");
+        ((TextView)findViewById(R.id.displayTrainsTitle)).setText(current+" - "+dest);
+        Log.w("STRAT",current+dest);
         try {
             InputStream fileInputStream = getAssets().open("stations.json");
             ArrayList<String> stationsList = new ArrayList<>();
@@ -77,45 +79,28 @@ public class DisplayTrains extends AppCompatActivity {
                     currentStationTrains = station.getJSONArray("trainsAndTime");
                 }
             }
-            CrowdInterface crowdService = RailrushClient.getClient().create(CrowdInterface.class);
             for (int i = 0; i < currentStationTrains.length(); i++) {
                 final JSONObject train = currentStationTrains.getJSONObject(i);
                 if (train.getString("dest").equals(dest)) {
-                    Call<Count> countCall = crowdService.getCrowdCount(train.getString("trainId"));
-                    countCall.enqueue(new Callback<Count>() {
-                        @Override
-                        public void onResponse(Call<Count> call, Response<Count> response) {
-                            try {
-                                Log.w("Count", String.valueOf(response.body().getCrowdCount()));
-                                trainsList.add(new Train(train.getString("start"), train.getString("dest"), train.getString("time"), String.valueOf((int) response.body().getCrowdCount()), " (" + response.body().getLastStation() + ")"));
-                                Collections.sort(trainsList,new Comparator<Train>() {
-                                    @Override
-                                    public int compare(Train o1, Train o2) {
-                                        try {
-                                            DateFormat dateFormat = new SimpleDateFormat("hh:mm");
-                                            long d1 = dateFormat.parse(o1.getTime()).getTime();
-                                            long d2 = dateFormat.parse(o2.getTime()).getTime();
-                                            return (int) (d1 - d2);
-                                        } catch (Exception e) {
-                                            Log.e("DATE_____________", e.toString());
-                                        }
-                                        return 0;
-                                    }
-                                });
-                                trainsRVAdapter = new TrainsRVAdapter(trainsList);
-                                trainsRV.setAdapter(trainsRVAdapter);
-                                swipe.setRefreshing(false);
-                            } catch (Exception e) {
-                                Log.w("CountCatch", "Error on response" + e.toString());
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Call<Count> call, Throwable t) {
-                            Log.w("SERVER ERRROR", t.toString());
-                        }
-                    });
+                    trainsList.add(new Train(train.getString("start"), train.getString("dest"), train.getString("time"), "", "",train.getString("trainNo")));
                 }
+                Collections.sort(trainsList,new Comparator<Train>() {
+                    @Override
+                    public int compare(Train o1, Train o2) {
+                        try {
+                            DateFormat dateFormat = new SimpleDateFormat("hh:mm");
+                            long d1 = dateFormat.parse(o1.getTime()).getTime();
+                            long d2 = dateFormat.parse(o2.getTime()).getTime();
+                            return (int) (d1 - d2);
+                        } catch (Exception e) {
+                            Log.e("DATE_____________", e.toString());
+                        }
+                        return 0;
+                    }
+                });
+                trainsRVAdapter = new TrainsRVAdapter(trainsList);
+                trainsRV.setAdapter(trainsRVAdapter);
+                swipe.setRefreshing(false);
             }
         } catch (Exception e) {
             Log.w("Count", "Error Disla" + e.toString());

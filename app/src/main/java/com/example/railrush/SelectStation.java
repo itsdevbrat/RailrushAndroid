@@ -1,12 +1,16 @@
 package com.example.railrush;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -42,17 +46,36 @@ public class SelectStation extends AppCompatActivity {
                 stationTV.setBackground(getDrawable(R.drawable.round_corners_blue));
                 LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
                 layoutParams.setMargins(10,10,10,10);
-                layoutParams.gravity = Gravity.CENTER;
                 stationTV.setLayoutParams(layoutParams);
                 stationTV.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent intent = new Intent(SelectStation.this,SelectDirection.class);
+                        final Intent intent = new Intent(SelectStation.this,DisplayTrains.class);
                         try{
                             intent.putExtra("station",station.getString("name"));
-                        }catch (Exception e){}
-                        Log.w("Station", intent.getStringExtra("station"));
-                        startActivity(intent);
+                            View dialog = LayoutInflater.from(SelectStation.this).inflate(R.layout.dialog_select_direction,null);
+                            new AlertDialog.Builder(SelectStation.this)
+                                    .setView(dialog)
+                                    .show();
+                            Button optionVirar = dialog.findViewById(R.id.virarTV);
+                            Button optionChurchgate = dialog.findViewById(R.id.churchgateTV);
+                            optionVirar.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    intent.putExtra("dest","virar");
+                                    startActivity(intent);
+                                }
+                            });
+                            optionChurchgate.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    intent.putExtra("dest","churchgate");
+                                    startActivity(intent);
+                                }
+                            });
+                        }catch (Exception e){
+                            Log.e("Station", e.toString());
+                        }
                     }
                 });
                 stationTV.setPadding(50,50,50,50);

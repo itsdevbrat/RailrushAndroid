@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingHorizontal="8dp"
     android:background="@color/colorPrimaryDark"
     tools:context=".SelectStation">
 
@@ -15,6 +16,7 @@
         android:layout_marginBottom="8dp"
         android:text="Where are you?"
         android:textColor="#fff"
+        android:paddingTop="32dp"
         android:textSize="30sp"
         app:layout_constraintBottom_toTopOf="@+id/scrollView2"
         app:layout_constraintEnd_toEndOf="parent"
